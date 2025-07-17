@@ -1,0 +1,21 @@
+# Root-level ignores
+.DS_Store
+.env
+
+# Node.js backend (e.g., /backend)
+backend/node_modules/
+backend/.env
+
+# React frontend (e.g., /frontend)
+frontend/node_modules/
+frontend/.env
+frontend/build/
+
+# Python ML (e.g., /ML)
+ml-service/venv/
+ml-service/__pycache__/
+ml-service/*.pyc
+ml-service/.env
+
+# VS Code settings (optional)
+.vscode/
