@@ -127,6 +127,35 @@ const BR = new BookingRepository();
 const RHR = new RentalHistoryRepository();
 
 export default class BookingController {
+  // async createBooking(req, res) {
+  //   try {
+  //     const { propertyId, startDate, endDate } = req.body;
+  //     console.log(req.body);
+  //     const tenantId = req.userId;
+
+  //     const db = getDB();
+
+  //     const property = await db.collection("properties").findOne({ _id: new ObjectId(propertyId) });
+  //     if (!property) return res.status(404).send("Property not found");
+
+  //     const owner = await db.collection("users").findOne({ _id: new ObjectId(property.ownerId) });
+  //     if (!owner?.email) return res.status(404).send("Owner not found");
+
+  //     const hasOverlap = await BR.checkOverlap(propertyId, startDate, endDate);
+  //     if (hasOverlap) return res.status(409).send("Booking overlaps with existing one");
+
+  //     const booking = await BR.createBooking(tenantId, propertyId, startDate, endDate, "pending");
+
+  //     const message = `Booking request by tenant ${tenantId} for property "${property.title}" from ${startDate} to ${endDate}`;
+  //     await sendEmail(owner.email, "New Booking Request", message);
+
+  //     res.status(201).send("Booking request submitted.");
+  //   } catch (err) {
+  //     console.error("Booking Error:", err);
+  //     res.status(500).send("Failed to create booking");
+  //   }
+  // }
+  
   async createBooking(req, res) {
     try {
       const { propertyId, startDate, endDate } = req.body;
@@ -134,6 +163,7 @@ export default class BookingController {
 
       const db = getDB();
 
+      // ... existing property & owner validation checks ...
       const property = await db.collection("properties").findOne({ _id: new ObjectId(propertyId) });
       if (!property) return res.status(404).send("Property not found");
 
@@ -143,18 +173,22 @@ export default class BookingController {
       const hasOverlap = await BR.checkOverlap(propertyId, startDate, endDate);
       if (hasOverlap) return res.status(409).send("Booking overlaps with existing one");
 
-      const booking = await BR.createBooking(tenantId, propertyId, startDate, endDate, "pending");
+      // ✅ FIX 1: Correct Argument Order (propertyId first, then tenantId)
+      // Note: "pending" is not in your repo definition, so make sure your BookingModel handles status default
+      const booking = await BR.createBooking(propertyId, tenantId, startDate, endDate);
 
       const message = `Booking request by tenant ${tenantId} for property "${property.title}" from ${startDate} to ${endDate}`;
       await sendEmail(owner.email, "New Booking Request", message);
 
-      res.status(201).send("Booking request submitted.");
+      // ✅ FIX 2: Return the actual booking object (JSON), NOT a string
+      res.status(201).json(booking); 
+
     } catch (err) {
       console.error("Booking Error:", err);
       res.status(500).send("Failed to create booking");
     }
   }
-
+  
   async approveBooking(req, res) {
     try {
       const { id } = req.params;
@@ -172,7 +206,8 @@ export default class BookingController {
         booking.endDate
       );
 
-      res.send("Booking approved and rental history created.");
+      // res.send("Booking approved and rental history created.");
+      res.json(booking);
     } catch (err) {
       console.error(err);
       res.status(500).send("Failed to approve booking");
@@ -183,7 +218,8 @@ export default class BookingController {
     try {
       const { id } = req.params;
       await BR.updateBookingStatus(id, "denied");
-      res.send("Booking denied");
+      // res.send("Booking denied");
+      res.json(booking);
     } catch (err) {
       console.error(err);
       res.status(500).send("Failed to deny booking");

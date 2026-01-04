@@ -23,7 +23,7 @@ export default class UserRepository {
 
       // Create user object
       const user = new UserModel(name, email, role,hashedPassword);
-
+                
       // Insert into database
       await collection.insertOne(user);
 

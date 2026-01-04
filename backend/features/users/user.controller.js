@@ -23,7 +23,7 @@ export default class UserController{
 
         const result = await UR.signIn(email,password)
         if(!result){
-            return res.send('user not login');
+            return res.status(400).send('user not login');
         }
         else{
             const token=jwt.sign(
@@ -37,6 +37,7 @@ export default class UserController{
                     expiresIn:"24h"
                 }
             )
+            console.log(token);
             return res.status(200).send({
                 user:result,
                 token:token,
